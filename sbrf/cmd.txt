@@ -1,0 +1,16 @@
+keytool -importcert -file "I:\andersen\sberbank\sbrf1.cer" -alias "sbrf1" -keystore "D:/Java/jdk1.8.0_91/jre/lib/security/cacerts" -storepass "changeit"
+keytool -importcert -file "I:\andersen\sberbank\sbrf2.cer" -alias "sbrf2" -keystore "D:/Java/jdk1.8.0_91/jre/lib/security/cacerts" -storepass "changeit"
+keytool -importcert -file "I:\andersen\sberbank\sbrf3ios.cer" -alias "sbrf3ios" -keystore "D:/Java/jdk1.8.0_91/jre/lib/security/cacerts" -storepass "changeit"
+keytool -importcert -file "I:\andersen\sberbank\sbrfappios.cer" -alias "sbrfappios" -keystore "D:/Java/jdk1.8.0_91/jre/lib/security/cacerts" -storepass "changeit"
+keytool -importcert -file "I:\andersen\sberbank\sbrf3and.cer" -alias "sbrf3and" -keystore "D:/Java/jdk1.8.0_91/jre/lib/security/cacerts" -storepass "changeit"
+keytool -importcert -file "I:\andersen\sberbank\sbrfappand.cer" -alias "sbrfappand" -keystore "D:/Java/jdk1.8.0_91/jre/lib/security/cacerts" -storepass "changeit"
+
+keytool -delete -alias "sbrf1" -keystore "D:/Java/jdk1.8.0_91/jre/lib/security/cacerts" -storepass "changeit"
+keytool -delete -alias "sbrf2" -keystore "D:/Java/jdk1.8.0_91/jre/lib/security/cacerts" -storepass "changeit"
+keytool -delete -alias "sbrf3ios" -keystore "D:/Java/jdk1.8.0_91/jre/lib/security/cacerts" -storepass "changeit"
+keytool -delete -alias "sbrfappios" -keystore "D:/Java/jdk1.8.0_91/jre/lib/security/cacerts" -storepass "changeit"
+keytool -delete -alias "sbrf3and" -keystore "D:/Java/jdk1.8.0_91/jre/lib/security/cacerts" -storepass "changeit"
+keytool -delete -alias "sbrfappand" -keystore "D:/Java/jdk1.8.0_91/jre/lib/security/cacerts" -storepass "changeit"
+
+java/jdk/bin
+chrome://settings/siteData
