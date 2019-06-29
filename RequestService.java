@@ -1,5 +1,3 @@
-package tv.twitch.totallybot.todete.a2;
-
 import javax.net.ssl.HttpsURLConnection;
 import java.io.*;
 import java.net.*;

@@ -1,5 +1,3 @@
-package tv.twitch.totallybot.todete.a2;
-
 import javax.json.Json;
 import java.util.HashMap;
 import java.util.Map;
