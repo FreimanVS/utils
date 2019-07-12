@@ -19,6 +19,26 @@ public class SbrfService {
 
         java/jdk/bin
         chrome://settings/siteData
+		
+		Convertion certificates:
+		
+		https://www.emaro-ssl.ru/blog/convert-ssl-certificate-formats/
+		
+		Конвертировать PEM в DER
+		openssl x509 -outform der -in certificate.pem -out certificate.der
+		Конвертировать PEM в P7B
+		openssl crl2pkcs7 -nocrl -certfile certificate.cer -out certificate.p7b -certfile CACert.cer
+		Конвертировать PEM в PFX
+		openssl pkcs12 -export -out certificate.pfx -inkey privateKey.key -in certificate.crt -certfile CACert.crt
+		Конвертировать DER в PEM
+		openssl x509 -inform der -in certificate.cer -out certificate.pem
+		Конвертировать P7B в PEM
+		openssl pkcs7 -print_certs -in certificate.p7b -out certificate.cer
+		Конвертировать P7B в PFX
+		openssl pkcs7 -print_certs -in certificate.p7b -out certificate.ceropenssl pkcs12 -export -in certificate.cer -inkey privateKey.key -out certificate.pfx -certfile CACert.cer
+		Конвертировать PFX в PEM
+		openssl pkcs12 -in certificate.pfx -out certificate.cer -nodes
+		
      */
 
     private static final String ERIB_LOGIN_IFT_B1 = "rozhkov_iy8x7622d6";
