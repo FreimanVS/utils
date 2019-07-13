@@ -39,6 +39,8 @@ public class SbrfService {
 		Конвертировать PFX в PEM
 		openssl pkcs12 -in certificate.pfx -out certificate.cer -nodes
 		
+		System.setProperty("javax.net.debug", "all");
+		
      */
 
     private static final String ERIB_LOGIN_IFT_B1 = "rozhkov_iy8x7622d6";
