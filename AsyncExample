@@ -1,0 +1,70 @@
+private static final ExecutorService ES = Executors.newCachedThreadPool();
+    private static final Exchanger<String> EXCHANGER = new Exchanger<>();
+    private static final Exchanger<String> EXCHANGER2 = new Exchanger<>();
+
+    public static void main(String[] args) {
+//        TwitchService.commentsToFile("461488274");
+
+        ES.submit(() -> {
+            System.out.println("thread 4");
+
+            try {
+                String hello1 = EXCHANGER.exchange("HELLO4 (AsyncHandler)", 1000, TimeUnit.SECONDS);
+                System.out.println("HELLO1 " + hello1);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (TimeoutException e) {
+                e.printStackTrace();
+            }
+        });
+
+        ES.submit(() -> {
+            System.out.println("thread 1");
+
+            try {
+                String hello4 = EXCHANGER.exchange("HELLO1 (service)", 1000, TimeUnit.SECONDS);
+
+                System.out.println("hello4 " + hello4);
+
+                TimeUnit.SECONDS.sleep(5);
+
+                String hello3 = EXCHANGER2.exchange(hello4, 1000, TimeUnit.SECONDS);
+
+                System.out.println("HELLO 3: " + hello3);
+
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (TimeoutException e) {
+                e.printStackTrace();
+            }
+        });
+
+        ES.submit(() -> {
+            System.out.println("thread 2");
+
+            try {
+                String hello2 = EXCHANGER2.exchange("HELLO2 (waitStep1)", 2, TimeUnit.SECONDS);
+                System.out.println("DO NOT HAVE TO SHOW ANYTHING: " + hello2);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (TimeoutException e) {
+                e.printStackTrace();
+                System.out.println("thread 2 exception");
+            }
+        });
+
+        ES.submit(() -> {
+            System.out.println("thread 3")
+            ;try {
+                TimeUnit.SECONDS.sleep(7);
+                String hello4 = EXCHANGER2.exchange("HELLO3 (waitStep2)", 1000, TimeUnit.SECONDS);
+                System.out.println("Hello 4: " + hello4);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (TimeoutException e) {
+                e.printStackTrace();
+            }
+        });
+
+        ES.shutdown();
+    }
