@@ -1,0 +1,173 @@
+@XmlRootElement(name = "Human")
+@XmlType(propOrder = {"name", "age"})
+public class Human implements Serializable {
+    private String name;
+    private String age;
+
+    public Human() {}
+
+    @XmlElement(name = "name")
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @XmlElement(name = "age")
+    public String getAge() {
+        return age;
+    }
+
+    public void setAge(String age) {
+        this.age = age;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Human human = (Human) o;
+        return Objects.equals(name, human.name) &&
+                Objects.equals(age, human.age);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, age);
+    }
+
+    @Override
+    public String toString() {
+        return "Human{" +
+                "name='" + name + '\'' +
+                ", age=" + age +
+                '}';
+    }
+}
+
+
+
+
+
+
+
+
+
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.events.XMLEvent;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
+public class StaxStreamProcessor implements AutoCloseable{
+    private static final XMLInputFactory FACTORY = XMLInputFactory.newInstance();
+
+    private final XMLStreamReader reader;
+
+    public StaxStreamProcessor(InputStream is) throws XMLStreamException {
+        reader = FACTORY.createXMLStreamReader(is);
+    }
+
+    public XMLStreamReader getReader() {
+        return reader;
+    }
+
+    @Override
+    public void close() {
+        if (reader != null) {
+            try {
+                reader.close();
+            } catch (XMLStreamException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        try (StaxStreamProcessor processor = new StaxStreamProcessor(Files.newInputStream(Paths.get("payload.xml")))) {
+            Human human = new Human();
+            String fileName = "payload2.xml";
+            XMLStreamReader reader = processor.getReader();
+            while (reader.hasNext()) {
+                int event = reader.next();
+                if (event == XMLEvent.START_ELEMENT &&
+                        "Name".equals(reader.getLocalName())) {
+                    String s = reader.getElementText();
+                    System.out.println(s);
+                    human.setName(s);
+                }
+                if (event == XMLEvent.START_ELEMENT &&
+                        "Age".equals(reader.getLocalName())) {
+                    String s = reader.getElementText();
+                    System.out.println(s);
+                    human.setAge(s);
+                }
+            }
+            convertObjectToXml(human, fileName);
+        } catch (XMLStreamException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+//    public static void main(String[] args) {
+//        // определяем название файла, куда будем сохранять
+//        String fileName = "payload2.xml";
+//
+//        //создаем объект Student с какими-то данными
+//        Human student = new Human();
+//        student.setAge(21);
+//        student.setName("Andrew");
+//
+//        // сохраняем объект в XML файл
+//        convertObjectToXml(student, fileName);
+//
+//        // восстанавливаем объект из XML файла
+//        Human unmarshStudent = fromXmlToObject(fileName);
+//        if (unmarshStudent != null) {
+//            System.out.println(unmarshStudent.toString());
+//        }
+//    }
+
+
+    // восстанавливаем объект из XML файла
+    private static Human fromXmlToObject(String filePath) {
+        try {
+            // создаем объект JAXBContext - точку входа для JAXB
+            JAXBContext jaxbContext = JAXBContext.newInstance(Human.class);
+            Unmarshaller un = jaxbContext.createUnmarshaller();
+
+            return (Human) un.unmarshal(new File(filePath));
+        } catch (JAXBException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    // сохраняем объект в XML файл
+    private static void convertObjectToXml(Human student, String filePath) {
+        try {
+            JAXBContext context = JAXBContext.newInstance(Human.class);
+            Marshaller marshaller = context.createMarshaller();
+            // устанавливаем флаг для читабельного вывода XML в JAXB
+            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+
+            // маршаллинг объекта в файл
+            marshaller.marshal(student, new File(filePath));
+        } catch (JAXBException e) {
+            e.printStackTrace();
+        }
+    }
+}
