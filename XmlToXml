@@ -194,3 +194,9 @@ public class ReadAllFilesFromAFolder {
         }
     }
 }
+
+
+
+
+javac -classpath 1.jar;2.jar;3.jar;4.jar;. Main.java
+java -classpath 1.jar;2.jar;3.jar;4.jar;. Main
