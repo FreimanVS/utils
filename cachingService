@@ -1,68 +1,65 @@
-import java.util.Date;
+import java.util.Calendar;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class CachingService {
+public class CachingService<T> {
 
     private static final ReentrantLock LOCKER = new ReentrantLock();
     private static final ScheduledExecutorService SES = Executors.newScheduledThreadPool(1);
-    private static String texts;
+    private T object;
     private static final int hoursOfClearing = 23;
     private static final int minutesOfClearing = 59;
     private static final int secondsOfClearing = 59;
 
-    static {
+    {
         runClearingCacheTask();
     }
 
-    public static String getData() {
+    public T getData(Supplier<? extends T> getDataFromServer) {
 
-        if (texts == null) {
+        if (object == null) {
             try {
                 LOCKER.lock();
 
-                if (texts == null) {
-                    String dataFromServer = getDataFromServer();
-                    texts = dataFromServer;
+                if (object == null) {
+                    T dataFromServer = getDataFromServer.get();
+                    object = dataFromServer;
                 }
             } finally {
                 LOCKER.unlock();
             }
         }
 
-        return texts;
+        return object;
     }
 
-    private static String getDataFromServer() {
-        System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!DATA FROM SERVER");
-        return "alotoftexts";
-    }
+    private long getTimeDifference() {
+        Calendar dateNow = Calendar.getInstance();
+        int yearNow = dateNow.get(Calendar.YEAR) - 1900;
+        int monthNow = dateNow.get(Calendar.MONTH);
+        int dayNow = dateNow.get(Calendar.DAY_OF_MONTH);
 
-    private static long getTimeDifference() {
-        Date dateNow = new Date();
-        int yearNow = dateNow.getYear();
-        int monthNow = dateNow.getMonth();
-        int dayNow = dateNow.getDate();
+//        Date dateUntil = new Date(yearNow, monthNow, dayNow, hoursOfClearing, minutesOfClearing, secondsOfClearing);
+        Calendar dateUntil = Calendar.getInstance();
+        dateUntil.set(yearNow + 1900, monthNow, dayNow, hoursOfClearing, minutesOfClearing, secondsOfClearing);
 
-        Date dateUntil = new Date(yearNow, monthNow, dayNow, hoursOfClearing, minutesOfClearing, secondsOfClearing);
-
-        long timeInMillisNow = dateNow.getTime();
-        long timeInMillisUntil = dateUntil.getTime();
+        long timeInMillisNow = dateNow.getTimeInMillis();
+        long timeInMillisUntil = dateUntil.getTimeInMillis();
 
         long timeDifference = timeInMillisUntil - timeInMillisNow;
         return timeDifference;
     }
 
-    private static void runClearingCacheTask() {
+    private void runClearingCacheTask() {
         System.out.println("runClearingCacheTask initializing....");
         SES.scheduleAtFixedRate(
                 new Runnable() {
                     @Override
                     public void run() {
                         System.out.println("The clearing cache task is in the processing...");
-                        texts = null;
+                        object = null;
                         System.out.println("The clearing cache task successfully completed!");
                     }
                 },
@@ -72,6 +69,25 @@ public class CachingService {
         );
         System.out.println("runClearingCacheTask successfully initialized!");
     }
+
+    public interface Supplier<T> {
+        T get();
+    }
+
+//    private long getTimeDifference() {
+//        Date dateNow = new Date();
+//        int yearNow = dateNow.getYear();
+//        int monthNow = dateNow.getMonth();
+//        int dayNow = dateNow.getDate();
+//
+//        Date dateUntil = new Date(yearNow, monthNow, dayNow, hoursOfClearing, minutesOfClearing, secondsOfClearing);
+//
+//        long timeInMillisNow = dateNow.getTime();
+//        long timeInMillisUntil = dateUntil.getTime();
+//
+//        long timeDifference = timeInMillisUntil - timeInMillisNow;
+//        return timeDifference;
+//    }
 }
 
 
@@ -86,24 +102,37 @@ import java.util.concurrent.TimeUnit;
 public class Main {
     private static final ExecutorService ES = Executors.newCachedThreadPool();
     private static final CountDownLatch LATCH = new CountDownLatch(1);
+    private CachingService<String> cachingService = new CachingService<>();
 
-    public static void main(String[] args) {
-
+    public void main() {
         for (int j = 0; j < 100; j++) {
-            ES.submit(() -> {
-                try {
-                    LATCH.await();
-                    String t = Thread.currentThread().getName();
-                    while (true) {
-                        System.out.println("RESULT" + t + "=" + CachingService.getData());
-                        TimeUnit.SECONDS.sleep(1L);
+            ES.submit(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        LATCH.await();
+                        String t = Thread.currentThread().getName();
+                        while (true) {
+                            System.out.println("RESULT" + t + "=" + cachingService.getData(new CachingService.Supplier<String>() {
+                                @Override
+                                public String get() {
+                                    System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!DATA FROM SERVER");
+                                    return "alotoftexts";
+                                }
+                            }));
+                            TimeUnit.SECONDS.sleep(1L);
+                        }
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
                 }
             });
         }
 
         LATCH.countDown();
+    }
+
+    public static void main(String[] args) {
+        new Main().main();
     }
 }
