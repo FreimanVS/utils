@@ -9,9 +9,9 @@ public class CachingService<T> {
     private static final ReentrantLock LOCKER = new ReentrantLock();
     private static final ScheduledExecutorService SES = Executors.newScheduledThreadPool(1);
     private T object;
-    private static int hoursOfClearing = 7;
-    private static int minutesOfClearing = 58;
-    private static int secondsOfClearing = 0;
+    private static int hoursOfClearing = 8;
+    private static int minutesOfClearing = 18;
+    private static int secondsOfClearing = 35;
 
     {
         runClearingCacheTask();
@@ -53,27 +53,27 @@ public class CachingService<T> {
     }
 
     private void runClearingCacheTask() {
-        System.out.println("Задача по очистке кэша раз в сутки находится в процессе инициализации...");
+        System.out.println("Задача по очистке кэша находится в процессе инициализации...");
 
         long timeDifference = getTimeDifference();
-        long sutki = 86400000L;
+        long period = 86400000L;
 
-        System.out.println("Задача по очистке кэша раз в сутки впервые запустится через " + timeDifference + " ms и будет повторяться каждые 24 часа");
+        System.out.println("Задача по очистке кэша впервые запустится через " + timeDifference + " ms и будет повторяться каждые " + period + " ms.");
 
         SES.scheduleAtFixedRate(
                 new Runnable() {
                     @Override
                     public void run() {
-                        System.out.println("Задача по очистке кэша раз в сутки запущена...");
+                        System.out.println("Задача по очистке кэша запущена...");
                         object = null;
-                        System.out.println("Задача по очистке кэша раз в сутки успешно завершена!");
+                        System.out.println("Задача по очистке кэша успешно завершена!");
                     }
                 },
                 timeDifference,
-                sutki,
+                period,
                 TimeUnit.MILLISECONDS
         );
-        System.out.println("Задача по очистке кэша раз в сутки успешно инициализирована!");
+        System.out.println("Задача по очистке кэша успешно инициализирована!");
     }
 
     public interface Supplier<T> {
@@ -95,7 +95,6 @@ public class CachingService<T> {
 //        return timeDifference;
 //    }
 }
-
 
 
 
