@@ -9,9 +9,9 @@ public class CachingService<T> {
     private static final ReentrantLock LOCKER = new ReentrantLock();
     private static final ScheduledExecutorService SES = Executors.newScheduledThreadPool(1);
     private T object;
-    private static final int hoursOfClearing = 23;
-    private static final int minutesOfClearing = 59;
-    private static final int secondsOfClearing = 59;
+    private static int hoursOfClearing = 7;
+    private static int minutesOfClearing = 58;
+    private static int secondsOfClearing = 0;
 
     {
         runClearingCacheTask();
@@ -41,7 +41,6 @@ public class CachingService<T> {
         int monthNow = dateNow.get(Calendar.MONTH);
         int dayNow = dateNow.get(Calendar.DAY_OF_MONTH);
 
-//        Date dateUntil = new Date(yearNow, monthNow, dayNow, hoursOfClearing, minutesOfClearing, secondsOfClearing);
         Calendar dateUntil = Calendar.getInstance();
         dateUntil.set(yearNow + 1900, monthNow, dayNow, hoursOfClearing, minutesOfClearing, secondsOfClearing);
 
@@ -49,25 +48,32 @@ public class CachingService<T> {
         long timeInMillisUntil = dateUntil.getTimeInMillis();
 
         long timeDifference = timeInMillisUntil - timeInMillisNow;
-        return timeDifference;
+
+        return timeDifference >= 0 ? timeDifference : timeDifference + 86400000;
     }
 
     private void runClearingCacheTask() {
-        System.out.println("runClearingCacheTask initializing....");
+        System.out.println("Задача по очистке кэша раз в сутки находится в процессе инициализации...");
+
+        long timeDifference = getTimeDifference();
+        long sutki = 86400000L;
+
+        System.out.println("Задача по очистке кэша раз в сутки впервые запустится через " + timeDifference + " ms и будет повторяться каждые 24 часа");
+
         SES.scheduleAtFixedRate(
                 new Runnable() {
                     @Override
                     public void run() {
-                        System.out.println("The clearing cache task is in the processing...");
+                        System.out.println("Задача по очистке кэша раз в сутки запущена...");
                         object = null;
-                        System.out.println("The clearing cache task successfully completed!");
+                        System.out.println("Задача по очистке кэша раз в сутки успешно завершена!");
                     }
                 },
-                getTimeDifference(),
-                86400000,
+                timeDifference,
+                sutki,
                 TimeUnit.MILLISECONDS
         );
-        System.out.println("runClearingCacheTask successfully initialized!");
+        System.out.println("Задача по очистке кэша раз в сутки успешно инициализирована!");
     }
 
     public interface Supplier<T> {
@@ -116,7 +122,7 @@ public class Main {
                             System.out.println("RESULT" + t + "=" + cachingService.getData(new CachingService.Supplier<String>() {
                                 @Override
                                 public String get() {
-                                    System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!DATA FROM SERVER");
+                                    System.out.println("Данные получены с сервера!");
                                     return "alotoftexts";
                                 }
                             }));
