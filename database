@@ -14,3 +14,16 @@ ALTER TABLE t ADD CONSTRAINT someIndex UNIQUE(field);
 
 ALTER TABLE t DROP INDEX someIndex;
 ALTER TABLE t DROP COLUMN field;
+
+
+//oracle db pl/sql
+/** DROP INDEX */
+DECLARE
+    i INTEGER;
+BEGIN
+    SELECT COUNT(*) INTO i FROM user_indexes WHERE index_name = 'phone';
+    IF i > 0 THEN
+        EXECUTE IMMEDIATE 'DROP INDEX phone';
+    END IF;
+END;
+/
