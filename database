@@ -17,6 +17,9 @@ ALTER TABLE t DROP COLUMN field;
 
 
 //oracle db pl/sql
+
+online oracle db: https://livesql.oracle.com/apex/
+
 /** DROP INDEX */
 DECLARE
     i INTEGER;
