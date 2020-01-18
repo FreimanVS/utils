@@ -39,3 +39,62 @@ IF index_count > 0 THEN
 END IF;
 END;
 /
+
+
+
+
+
+
+
+
+
+-- create tables
+create table create_table_if_not_exists_t (
+    id_int_auto_increment_not_null varchar2(4000),
+    field1varchar2100_null         varchar2(4000),
+    field2varchar2100_null         varchar2(4000),
+    primary_key_id                 varchar2(4000)
+)
+;
+
+
+-- triggers
+create or replace trigger create_table_if_not_exists_biu
+    before insert or update 
+    on create_table_if_not_exists_t
+    for each row
+begin
+    null;
+end create_table_if_not_exists_biu;
+/
+    
+SELECT COUNT(*) FROM user_indexes WHERE index_name = 'INDEX1';
+
+DECLARE
+    i INTEGER;
+BEGIN
+    SELECT COUNT(*) INTO i FROM user_indexes WHERE index_name = 'INDEX1';
+    IF i > 0 THEN
+        EXECUTE IMMEDIATE 'DROP INDEX INDEX1';
+    END IF;
+END;
+/
+    
+SELECT COUNT(*) FROM user_indexes WHERE index_name = 'INDEX1';
+
+DECLARE
+    i INTEGER;
+BEGIN
+    SELECT COUNT(*) INTO i FROM user_indexes WHERE index_name = 'INDEX1';
+    IF i = 0 THEN
+        EXECUTE IMMEDIATE 'CREATE INDEX INDEX1 ON create_table_if_not_exists_t(field1varchar2100_null)';
+    END IF;
+END;
+/
+    
+SELECT COUNT(*) FROM user_indexes WHERE index_name = 'INDEX1';
+
+INSERT INTO create_table_if_not_exists_t(field1varchar2100_null) VALUES('asdf');
+INSERT INTO create_table_if_not_exists_t(field1varchar2100_null) VALUES('asdf');
+
+SELECT * FROM create_table_if_not_exists_t;
